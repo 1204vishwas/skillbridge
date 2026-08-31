@@ -1,0 +1,20 @@
+# Render Blueprint — deploys the SkillBridge backend API.
+# Set MONGO_URI (e.g. a MongoDB Atlas connection string) in the Render dashboard.
+services:
+  - type: web
+    name: skillbridge-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MONGO_URI
+        sync: false
+      - key: CLIENT_URL
+        sync: false
