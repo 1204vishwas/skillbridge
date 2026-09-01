@@ -3,14 +3,17 @@ import mongoose from 'mongoose';
 /**
  * Connect to MongoDB.
  *
- * If MONGO_URI is provided we connect to that database.
- * Otherwise we boot an in-memory MongoDB instance so the project runs
- * out-of-the-box without any external database setup.
+ * In local development we allow an in-memory Mongo fallback.
+ * In production (Render), we require a real MONGO_URI to avoid broken deployments.
  */
 export async function connectDB() {
   let uri = process.env.MONGO_URI;
 
   if (!uri) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('MONGO_URI is required in production. Set it in the Render environment variables.');
+    }
+
     // Lazy import so production installs don't need the dev dependency.
     const { MongoMemoryServer } = await import('mongodb-memory-server');
     const mongod = await MongoMemoryServer.create();

@@ -4,7 +4,8 @@ import { connectDB, disconnectDB } from './config/db.js';
 import User from './models/User.js';
 import { seedDatabase } from './utils/seedData.js';
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+const HOST = '0.0.0.0';
 
 async function start() {
   try {
@@ -17,9 +18,10 @@ async function start() {
       await seedDatabase();
       console.log('   Demo login: student@skillbridge.dev / password123');
     }
-    const server = app.listen(PORT, () =>
-      console.log(`🚀 SkillBridge API running on http://localhost:${PORT}`)
-    );
+    const server = app.listen(PORT, HOST, () => {
+      const url = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+      console.log(`🚀 SkillBridge API running on ${url}`);
+    });
 
     const shutdown = async () => {
       console.log('\nShutting down...');

@@ -12,11 +12,20 @@ import adminRoutes from './routes/adminRoutes.js';
 import { notFound, errorHandler } from './middleware/error.js';
 
 const app = express();
+app.set('trust proxy', 1);
 
-// Core middleware
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map((origin) => origin.trim()).filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL?.split(',') || '*',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
