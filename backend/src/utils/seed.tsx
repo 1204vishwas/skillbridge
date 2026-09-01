@@ -6,7 +6,7 @@ import { seedDatabase } from './seedData.js';
  * Standalone seed runner. Use with a real MONGO_URI to persist demo data:
  *   MONGO_URI=mongodb://127.0.0.1:27017/skillbridge npm run seed
  */
-async function run() {
+async function run(): Promise<void> {
   await connectDB();
   console.log('🌱 Seeding database...');
   await seedDatabase({ clear: true });

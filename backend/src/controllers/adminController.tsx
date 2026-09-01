@@ -1,9 +1,10 @@
+import type { Request, Response } from 'express';
 import User from '../models/User.js';
 import Job from '../models/Job.js';
 import Application from '../models/Application.js';
 
 /** GET /api/admin/stats — dashboard analytics */
-export async function getStats(req, res) {
+export async function getStats(_req: Request, res: Response): Promise<void> {
   const [
     totalUsers,
     totalStudents,
@@ -46,14 +47,14 @@ export async function getStats(req, res) {
 }
 
 /** GET /api/admin/users — list users */
-export async function getUsers(req, res) {
+export async function getUsers(_req: Request, res: Response): Promise<void> {
   const users = await User.find().sort('-createdAt');
   res.json({ users });
 }
 
 /** DELETE /api/admin/users/:id — remove a user */
-export async function deleteUser(req, res) {
-  if (req.params.id === req.user._id.toString()) {
+export async function deleteUser(req: Request, res: Response): Promise<void> {
+  if (req.params.id === req.user!._id.toString()) {
     res.status(400);
     throw new Error('You cannot delete your own account');
   }
@@ -68,7 +69,7 @@ export async function deleteUser(req, res) {
 }
 
 /** GET /api/admin/jobs — all jobs */
-export async function getAllJobs(req, res) {
+export async function getAllJobs(_req: Request, res: Response): Promise<void> {
   const jobs = await Job.find().populate('postedBy', 'name email').sort('-createdAt');
   res.json({ jobs });
 }

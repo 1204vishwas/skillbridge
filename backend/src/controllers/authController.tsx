@@ -1,9 +1,15 @@
-import User, { ROLES } from '../models/User.js';
+import type { Request, Response } from 'express';
+import User, { ROLES, type Role } from '../models/User.js';
 import { signToken } from '../utils/token.js';
 
 /** POST /api/auth/register */
-export async function register(req, res) {
-  const { name, email, password, role } = req.body;
+export async function register(req: Request, res: Response): Promise<void> {
+  const { name, email, password, role } = req.body as {
+    name?: string;
+    email?: string;
+    password?: string;
+    role?: string;
+  };
 
   if (!name || !email || !password) {
     res.status(400);
@@ -11,8 +17,8 @@ export async function register(req, res) {
   }
 
   // Never allow self-registration as admin.
-  const safeRole = role === 'recruiter' ? 'recruiter' : 'student';
-  if (role && !ROLES.includes(role)) {
+  const safeRole: Role = role === 'recruiter' ? 'recruiter' : 'student';
+  if (role && !ROLES.includes(role as Role)) {
     res.status(400);
     throw new Error('Invalid role');
   }
@@ -30,8 +36,8 @@ export async function register(req, res) {
 }
 
 /** POST /api/auth/login */
-export async function login(req, res) {
-  const { email, password } = req.body;
+export async function login(req: Request, res: Response): Promise<void> {
+  const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {
     res.status(400);
@@ -49,6 +55,6 @@ export async function login(req, res) {
 }
 
 /** GET /api/auth/me */
-export async function getMe(req, res) {
+export async function getMe(req: Request, res: Response): Promise<void> {
   res.json({ user: req.user });
 }

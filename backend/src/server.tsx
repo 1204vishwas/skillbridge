@@ -7,7 +7,7 @@ import { seedDatabase } from './utils/seedData.js';
 const PORT = Number(process.env.PORT) || 5000;
 const HOST = '0.0.0.0';
 
-async function start() {
+async function start(): Promise<void> {
   try {
     await connectDB();
 
@@ -23,7 +23,7 @@ async function start() {
       console.log(`🚀 SkillBridge API running on ${url}`);
     });
 
-    const shutdown = async () => {
+    const shutdown = async (): Promise<void> => {
       console.log('\nShutting down...');
       server.close(async () => {
         await disconnectDB();

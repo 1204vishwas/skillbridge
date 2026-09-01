@@ -1,10 +1,35 @@
-import mongoose from 'mongoose';
+import { Schema, model, type HydratedDocument, type Model, type Types } from 'mongoose';
 
-const { Schema } = mongoose;
+export const JOB_TYPES = ['Full-time', 'Part-time', 'Internship', 'Contract', 'Remote'] as const;
+export type JobType = (typeof JOB_TYPES)[number];
 
-export const JOB_TYPES = ['Full-time', 'Part-time', 'Internship', 'Contract', 'Remote'];
+export interface IJob {
+  title: string;
+  company: string;
+  location: string;
+  type: JobType;
+  category: string;
+  description: string;
+  requirements: string[];
+  skills: string[];
 
-const jobSchema = new Schema(
+  salaryMin: number;
+  salaryMax: number;
+  experience: string;
+
+  // Recruiter who owns the posting
+  postedBy: Types.ObjectId;
+
+  isActive: boolean;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type JobModel = Model<IJob>;
+export type HydratedJob = HydratedDocument<IJob>;
+
+const jobSchema = new Schema<IJob, JobModel>(
   {
     title: { type: String, required: true, trim: true, index: 'text' },
     company: { type: String, required: true, trim: true },
@@ -30,4 +55,4 @@ const jobSchema = new Schema(
 // Compound text index for search across the main text fields.
 jobSchema.index({ title: 'text', company: 'text', description: 'text', skills: 'text' });
 
-export default mongoose.model('Job', jobSchema);
+export default model<IJob, JobModel>('Job', jobSchema);

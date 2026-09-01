@@ -24,7 +24,7 @@ management, an admin analytics dashboard, and a responsive UI with dark mode.
 | Layer          | Technology                              |
 | -------------- | --------------------------------------- |
 | Frontend       | React.js, TypeScript, Tailwind CSS, Vite |
-| Backend        | Node.js, Express.js                     |
+| Backend        | Node.js, Express.js, TypeScript         |
 | Database       | MongoDB (Mongoose)                      |
 | Authentication | JWT, bcrypt                             |
 | Deployment     | Vercel (frontend) + Render/Railway (backend) |
@@ -36,16 +36,17 @@ management, an admin analytics dashboard, and a responsive UI with dark mode.
 
 ```
 major project2/
-├── backend/                 # Express REST API
+├── backend/                 # Express REST API (TypeScript)
 │   ├── src/
-│   │   ├── config/db.js         # Mongo connection (+ in-memory fallback)
-│   │   ├── models/              # User, Job, Application
+│   │   ├── config/db.tsx        # Mongo connection (+ in-memory fallback)
+│   │   ├── models/              # User, Job, Application (typed schemas)
 │   │   ├── controllers/         # Route handlers
 │   │   ├── routes/              # /auth /jobs /applications /users /admin
-│   │   ├── middleware/          # protect + authorize (RBAC), error handler
+│   │   ├── types/               # Express Request augmentation
 │   │   ├── utils/               # token, seed data, async handler
-│   │   ├── app.js               # Express app
-│   │   └── server.js            # Entry point
+│   │   ├── app.tsx              # Express app
+│   │   └── server.tsx           # Entry point
+│   ├── tsconfig.json            # TypeScript config (compiles to dist/)
 │   ├── Dockerfile
 │   └── package.json
 ├── frontend/                # React + TypeScript + Tailwind SPA
@@ -80,10 +81,17 @@ major project2/
 cd backend
 cp .env.example .env      # optional: set MONGO_URI / JWT_SECRET
 npm install
-npm run dev               # http://localhost:5000  (nodemon, auto-restart)
+npm run dev               # http://localhost:5000  (tsx watch, auto-restart)
 ```
 
 On first start with an empty database, demo data is seeded automatically.
+
+For a production build, compile the TypeScript and run the output:
+
+```bash
+npm run build             # tsc -> dist/
+npm start                 # node dist/server.js
+```
 
 ### 2. Frontend
 

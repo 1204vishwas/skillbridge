@@ -1,10 +1,5 @@
 import { Router } from 'express';
-import {
-  getStats,
-  getUsers,
-  deleteUser,
-  getAllJobs,
-} from '../controllers/adminController.js';
+import { getStats, getUsers, deleteUser, getAllJobs } from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 

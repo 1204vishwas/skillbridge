@@ -1,4 +1,8 @@
 import mongoose from 'mongoose';
+import type { MongoMemoryServer } from 'mongodb-memory-server';
+
+// Holds the in-memory Mongo instance (dev only) so it can be stopped on shutdown.
+let memoryServer: MongoMemoryServer | undefined;
 
 /**
  * Connect to MongoDB.
@@ -6,7 +10,7 @@ import mongoose from 'mongoose';
  * In local development we allow an in-memory Mongo fallback.
  * In production (Render), we require a real MONGO_URI to avoid broken deployments.
  */
-export async function connectDB() {
+export async function connectDB(): Promise<void> {
   let uri = process.env.MONGO_URI;
 
   if (!uri) {
@@ -16,12 +20,9 @@ export async function connectDB() {
 
     // Lazy import so production installs don't need the dev dependency.
     const { MongoMemoryServer } = await import('mongodb-memory-server');
-    const mongod = await MongoMemoryServer.create();
-    uri = mongod.getUri();
+    memoryServer = await MongoMemoryServer.create();
+    uri = memoryServer.getUri();
     console.log('⚙️  No MONGO_URI found — started in-memory MongoDB for local dev.');
-
-    // Store so it can be stopped on shutdown.
-    global.__MONGOD__ = mongod;
   }
 
   mongoose.set('strictQuery', true);
@@ -30,9 +31,10 @@ export async function connectDB() {
   console.log(`✅ MongoDB connected: ${mongoose.connection.host}`);
 }
 
-export async function disconnectDB() {
+export async function disconnectDB(): Promise<void> {
   await mongoose.disconnect();
-  if (global.__MONGOD__) {
-    await global.__MONGOD__.stop();
+  if (memoryServer) {
+    await memoryServer.stop();
+    memoryServer = undefined;
   }
 }

@@ -1,12 +1,23 @@
-import User from '../models/User.js';
-import Job from '../models/Job.js';
+import User, { type HydratedUser } from '../models/User.js';
+import Job, { type HydratedJob, type IJob } from '../models/Job.js';
 import Application from '../models/Application.js';
+
+interface SeedOptions {
+  clear?: boolean;
+}
+
+export interface SeedResult {
+  admin: HydratedUser;
+  recruiter: HydratedUser;
+  student: HydratedUser;
+  jobs: HydratedJob[];
+}
 
 /**
  * Seed demo users, jobs and applications.
  * Returns the created demo accounts. Safe to call on an empty database.
  */
-export async function seedDatabase({ clear = false } = {}) {
+export async function seedDatabase({ clear = false }: SeedOptions = {}): Promise<SeedResult> {
   if (clear) {
     await Promise.all([User.deleteMany({}), Job.deleteMany({}), Application.deleteMany({})]);
   }
@@ -46,7 +57,10 @@ export async function seedDatabase({ clear = false } = {}) {
     skills: ['React', 'JavaScript', 'Node.js', 'MongoDB'],
   });
 
-  const jobsData = [
+  // Required job fields for seeding; optional/defaulted fields (isActive, timestamps) are omitted.
+  type JobSeed = Omit<IJob, 'isActive' | 'createdAt' | 'updatedAt'>;
+
+  const jobsData: JobSeed[] = [
     {
       title: 'Frontend Developer Intern',
       company: 'TechNova',
@@ -172,11 +186,11 @@ export async function seedDatabase({ clear = false } = {}) {
   const jobs = await Job.insertMany(jobsData);
 
   await Application.create([
-    { job: jobs[0]._id, applicant: student._id, status: 'Applied', coverLetter: 'Excited to learn frontend!' },
-    { job: jobs[1]._id, applicant: student._id, status: 'Reviewing', coverLetter: 'I love full-stack development.' },
+    { job: jobs[0]!._id, applicant: student._id, status: 'Applied', coverLetter: 'Excited to learn frontend!' },
+    { job: jobs[1]!._id, applicant: student._id, status: 'Reviewing', coverLetter: 'I love full-stack development.' },
   ]);
 
-  student.savedJobs = [jobs[2]._id, jobs[4]._id];
+  student.savedJobs = [jobs[2]!._id, jobs[4]!._id];
   await student.save();
 
   return { admin, recruiter, student, jobs };

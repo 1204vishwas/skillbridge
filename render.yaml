@@ -5,8 +5,8 @@ services:
     name: skillbridge-api
     runtime: node
     rootDir: backend
-    buildCommand: npm ci
-    startCommand: node src/server.js
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/server.js
     envVars:
       - key: NODE_ENV
         value: production

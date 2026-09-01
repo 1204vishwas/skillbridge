@@ -1,7 +1,5 @@
-import mongoose from 'mongoose';
+import { Schema, model, type HydratedDocument, type Model, type Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
-
-const { Schema } = mongoose;
 
 /**
  * Role-Based Access:
@@ -9,9 +7,37 @@ const { Schema } = mongoose;
  *  - recruiter : can post jobs and review applications on their jobs
  *  - admin     : full access to the admin dashboard
  */
-export const ROLES = ['student', 'recruiter', 'admin'];
+export const ROLES = ['student', 'recruiter', 'admin'] as const;
+export type Role = (typeof ROLES)[number];
 
-const userSchema = new Schema(
+export interface IUser {
+  name: string;
+  email: string;
+  password: string;
+  role: Role;
+
+  // Profile / resume management
+  headline: string;
+  bio: string;
+  location: string;
+  skills: string[];
+  resumeUrl: string;
+
+  // Saved jobs (bookmarks)
+  savedJobs: Types.ObjectId[];
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IUserMethods {
+  comparePassword(candidate: string): Promise<boolean>;
+}
+
+export type UserModel = Model<IUser, {}, IUserMethods>;
+export type HydratedUser = HydratedDocument<IUser, IUserMethods>;
+
+const userSchema = new Schema<IUser, UserModel, IUserMethods>(
   {
     name: { type: String, required: [true, 'Name is required'], trim: true },
     email: {
@@ -51,16 +77,16 @@ userSchema.pre('save', async function hashPassword(next) {
   next();
 });
 
-userSchema.methods.comparePassword = function comparePassword(candidate) {
+userSchema.methods.comparePassword = function comparePassword(candidate: string): Promise<boolean> {
   return bcrypt.compare(candidate, this.password);
 };
 
 // Strip sensitive fields when serialising.
 userSchema.methods.toJSON = function toJSON() {
-  const obj = this.toObject();
+  const obj: Record<string, unknown> = this.toObject();
   delete obj.password;
   delete obj.__v;
   return obj;
 };
 
-export default mongoose.model('User', userSchema);
+export default model<IUser, UserModel>('User', userSchema);

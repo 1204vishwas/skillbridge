@@ -21,9 +21,13 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
+      - name: Type-check
+        run: npm run typecheck
+      - name: Build (TypeScript -> dist)
+        run: npm run build
       - name: Boot API (in-memory Mongo) and hit health endpoint
         run: |
-          node src/server.js &
+          node dist/server.js &
           SERVER_PID=$!
           sleep 8
           curl --fail http://localhost:5000/api/health
