@@ -14,24 +14,38 @@ import { notFound, errorHandler } from './middleware/error.js';
 const app = express();
 app.set('trust proxy', 1);
 
+// Origins explicitly allowed via CLIENT_URL (comma-separated for multiple).
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// Any localhost / 127.0.0.1 origin (on any port) — covers Vite on 5173/5174/etc.
+const isLocalhost = (origin: string): boolean =>
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+const isAllowedOrigin = (origin: string): boolean =>
+  allowedOrigins.includes(origin) || isLocalhost(origin);
+
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Same-origin / non-browser requests (no Origin header) are always allowed.
+    if (!origin || isAllowedOrigin(origin)) {
       callback(null, true);
       return;
     }
 
-    callback(new Error('Not allowed by CORS'));
+    // Deny cleanly: don't throw (that strips CORS headers and 500s the request);
+    // the browser simply won't receive an Access-Control-Allow-Origin header.
+    console.warn(`⚠️  Blocked CORS origin: ${origin}`);
+    callback(null, false);
   },
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+// Answer preflight (OPTIONS) for every route with the same policy.
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));

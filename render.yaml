@@ -16,5 +16,6 @@ services:
         value: 7d
       - key: MONGO_URI
         sync: false
+      # Frontend origin(s) allowed by CORS (comma-separated for multiple).
       - key: CLIENT_URL
-        sync: false
+        value: https://skillbridge-git-main-1204vishwas-projects.vercel.app
